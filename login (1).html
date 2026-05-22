@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>APEX MOTORS — Login / Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0a0a;--surface:#111;--card:#161616;--border:#222;
+      --accent:#e8341c;--accent2:#ff6b4a;--gold:#c9a84c;
+      --text:#f0ece4;--muted:#888;--green:#2ecc71;
+      --font-head:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;
+    }
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;overflow-x:hidden;}
+    .bg-grid{position:fixed;inset:0;opacity:0.04;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;}
+    .bg-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(232,52,28,0.07) 0%,transparent 70%);pointer-events:none;}
+
+    .wrap{position:relative;z-index:2;width:100%;max-width:440px;}
+    .logo{font-family:var(--font-head);font-size:2.5rem;letter-spacing:4px;text-align:center;margin-bottom:6px;}
+    .logo span{color:var(--accent);}
+    .tagline{text-align:center;color:var(--muted);font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
+
+    /* CARD */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:36px 32px;box-shadow:0 40px 80px rgba(0,0,0,0.55);}
+
+    /* TABS — Login / Sign Up */
+    .main-tabs{display:flex;margin-bottom:28px;border-bottom:1px solid var(--border);}
+    .main-tab{flex:1;padding:11px;text-align:center;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+    .main-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+    /* PANELS */
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* ROLE TABS */
+    .role-tabs{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:22px;}
+    .role-tab{flex:1;padding:9px;text-align:center;font-size:0.71rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.2s;background:transparent;border:none;color:var(--muted);}
+    .role-tab.active{background:var(--accent);color:#fff;}
+
+    /* FORM FIELDS */
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+    .fg label{font-size:0.67rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+    .fg input,.fg select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:3px;font-family:var(--font-body);font-size:0.88rem;outline:none;transition:border-color 0.2s;width:100%;}
+    .fg input:focus,.fg select:focus{border-color:var(--accent);}
+    .fg option{background:var(--card);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    /* PASSWORD STRENGTH */
+    .strength-bar{height:3px;border-radius:2px;margin-top:6px;background:var(--border);overflow:hidden;}
+    .strength-fill{height:100%;width:0%;border-radius:2px;transition:width 0.3s,background 0.3s;}
+    .strength-text{font-size:0.65rem;color:var(--muted);margin-top:4px;}
+
+    /* BUTTONS */
+    .btn-main{width:100%;background:var(--accent);color:#fff;border:none;padding:13px;border-radius:3px;font-family:var(--font-body);font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+    .btn-main:hover{background:var(--accent2);transform:translateY(-1px);}
+
+    /* MESSAGES */
+    .msg{padding:10px 14px;border-radius:3px;font-size:0.8rem;margin-bottom:14px;display:none;}
+    .msg.show{display:block;}
+    .msg.error{background:rgba(232,52,28,0.1);border:1px solid rgba(232,52,28,0.3);color:#ff8066;}
+    .msg.success{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:var(--green);}
+
+    /* HINT BOX */
+    .hint-box{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:12px 14px;margin-top:18px;}
+    .hint-title{font-size:0.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .hint-row{display:flex;justify-content:space-between;font-size:0.77rem;padding:2px 0;}
+    .hint-val{color:var(--accent);font-weight:600;}
+
+    /* SWITCH LINK */
+    .switch-link{text-align:center;margin-top:18px;font-size:0.78rem;color:var(--muted);}
+    .switch-link a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none;}
+    .switch-link a:hover{color:var(--accent2);}
+
+    /* BACK LINK */
+    .back-link{text-align:center;margin-top:20px;}
+    .back-link a{color:var(--muted);font-size:0.76rem;text-decoration:none;transition:color 0.2s;}
+    .back-link a:hover{color:var(--text);}
+
+    /* DIVIDER */
+    .divider{display:flex;align-items:center;gap:10px;margin:14px 0;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .divider span{color:var(--muted);font-size:0.68rem;letter-spacing:1px;}
+
+    /* TERMS */
+    .terms-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;}
+    .terms-row input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;margin-top:2px;cursor:pointer;}
+    .terms-row label{font-size:0.76rem;color:var(--muted);cursor:pointer;line-height:1.5;}
+    .terms-row label a{color:var(--accent);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;right:28px;z-index:500;background:var(--green);color:#111;padding:12px 22px;border-radius:3px;font-size:0.8rem;font-weight:600;letter-spacing:1px;transform:translateY(60px);opacity:0;transition:all 0.35s;pointer-events:none;}
+    .toast.show{transform:translateY(0);opacity:1;}
+
+    /* INPUT ICON WRAPPER */
+    .input-wrap{position:relative;}
+    .input-wrap input{padding-right:40px;}
+    .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:4px;}
+    .eye-btn:hover{color:var(--text);}
+
+    @media(max-width:480px){.form-row{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="wrap">
+  <div class="logo">APEX<span>.</span>MOTORS</div>
+  <div class="tagline">Customer Portal</div>
+
+  <div class="card">
+    <!-- MAIN TABS -->
+    <div class="main-tabs">
+      <button class="main-tab active" id="tab-login-btn" onclick="switchMain('login')">Sign In</button>
+      <button class="main-tab" id="tab-signup-btn" onclick="switchMain('signup')">Create Account</button>
+    </div>
+
+    <!-- ══════════ LOGIN PANEL ══════════ -->
+    <div class="panel active" id="panel-login">
+      <div class="role-tabs">
+        <button class="role-tab active" id="rtab-user" onclick="switchRole('user')">👤 User</button>
+        <button class="role-tab" id="rtab-admin" onclick="switchRole('admin')">🛡️ Admin</button>
+      </div>
+
+      <div class="msg error" id="login-error"></div>
+
+      <div class="fg">
+        <label>Username</label>
+        <input type="text" id="l-username" placeholder="Enter your username" autocomplete="off"/>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="l-password" placeholder="Enter your password"/>
+          <button class="eye-btn" onclick="togglePwd('l-password',this)">👁</button>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="doLogin()">Sign In</button>
+
+      <div class="divider"><span>demo admin credentials</span></div>
+      <div class="hint-box" id="hintBox">
+        <div class="hint-title" id="hintTitle">Admin Login</div>
+        <div class="hint-row"><span class="hint-val" style="color:var(--muted)">Username:</span><span class="hint-val" id="hintUser">admin</span></div>
+        <div class="hint-row"><span class="hint-val" style="color:var(--muted)">Password:</span><span class="hint-val" id="hintPass">admin123</span></div>
+      </div>
+
+      <div class="switch-link">Don't have an account? <a onclick="switchMain('signup')">Sign Up</a></div>
+    </div>
+
+    <!-- ══════════ SIGN UP PANEL ══════════ -->
+    <div class="panel" id="panel-signup">
+      <div class="msg error" id="signup-error"></div>
+      <div class="msg success" id="signup-success"></div>
+
+      <div class="form-row">
+        <div class="fg">
+          <label>First Name</label>
+          <input type="text" id="s-fname" placeholder="Juan"/>
+        </div>
+        <div class="fg">
+          <label>Last Name</label>
+          <input type="text" id="s-lname" placeholder="Cruz"/>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Email Address</label>
+        <input type="email" id="s-email" placeholder="juan@email.com"/>
+      </div>
+
+      <div class="fg">
+        <label>Username</label>
+        <input type="text" id="s-username" placeholder="Choose a username" autocomplete="off" oninput="checkUsername()"/>
+        <div id="username-check" style="font-size:0.68rem;margin-top:4px;"></div>
+      </div>
+
+      <div class="fg">
+        <label>Phone Number</label>
+        <input type="tel" id="s-phone" placeholder="+63 9XX XXX XXXX"/>
+      </div>
+
+      <div class="fg">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="s-password" placeholder="Create a password" oninput="checkStrength()"/>
+          <button class="eye-btn" onclick="togglePwd('s-password',this)">👁</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-text" id="strength-text"></div>
+      </div>
+
+      <div class="fg">
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" id="s-confirm" placeholder="Repeat your password"/>
+          <button class="eye-btn" onclick="togglePwd('s-confirm',this)">👁</button>
+        </div>
+      </div>
+
+      <div class="terms-row">
+        <input type="checkbox" id="s-terms"/>
+        <label for="s-terms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a> of Apex Motors.</label>
+      </div>
+
+      <button class="btn-main" onclick="doSignup()">Create Account</button>
+
+      <div class="switch-link">Already have an account? <a onclick="switchMain('login')">Sign In</a></div>
+    </div>
+  </div>
+
+  <div class="back-link"><a href="index.html">← Back to Website</a></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STORAGE HELPERS ──────────────────────────
+  const ADMIN = { username:'admin', password:'admin123', role:'admin', name:'Admin Manager' };
+
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem('apex_users') || '[]'); } catch(e){ return []; }
+  }
+  function saveUsers(arr) { localStorage.setItem('apex_users', JSON.stringify(arr)); }
+
+  // ── TABS ─────────────────────────────────────
+  let currentRole = 'user';
+
+  function switchMain(tab) {
+    document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+    document.getElementById('panel-signup').classList.toggle('active', tab === 'signup');
+    document.getElementById('tab-login-btn').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup-btn').classList.toggle('active', tab === 'signup');
+    clearMessages();
+  }
+
+  function switchRole(role) {
+    currentRole = role;
+    document.getElementById('rtab-user').classList.toggle('active', role === 'user');
+    document.getElementById('rtab-admin').classList.toggle('active', role === 'admin');
+    document.getElementById('hintTitle').textContent = role === 'admin' ? 'Admin Login' : 'User — use your registered account';
+    document.getElementById('hintUser').textContent = role === 'admin' ? 'admin' : '(your username)';
+    document.getElementById('hintPass').textContent = role === 'admin' ? 'admin123' : '(your password)';
+    clearMessages();
+  }
+
+  function clearMessages() {
+    ['login-error','signup-error','signup-success'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('show'); el.textContent = '';
+    });
+  }
+
+  // ── LOGIN ────────────────────────────────────
+  function doLogin() {
+    const u = document.getElementById('l-username').value.trim();
+    const p = document.getElementById('l-password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.classList.remove('show');
+
+    if (!u || !p) { showLoginError('Please enter your username and password.'); return; }
+
+    // Check admin
+    if (currentRole === 'admin') {
+      if (u === ADMIN.username && p === ADMIN.password) {
+        saveSession({ username: ADMIN.username, name: ADMIN.name, role: 'admin' });
+        window.location.href = 'admin.html';
+      } else {
+        showLoginError('Invalid admin credentials.');
+      }
+      return;
+    }
+
+    // Check registered users
+    const users = getUsers();
+    const match = users.find(x => x.username === u && x.password === p);
+    if (!match) { showLoginError('Invalid username or password. Please try again.'); return; }
+
+    saveSession({ username: match.username, name: match.firstName + ' ' + match.lastName, role: 'user' });
+    window.location.href = 'dashboard.html';
+  }
+
+  function showLoginError(msg) {
+    const el = document.getElementById('login-error');
+    el.textContent = msg; el.classList.add('show');
+  }
+
+  // ── SIGN UP ──────────────────────────────────
+  function doSignup() {
+    const fname    = document.getElementById('s-fname').value.trim();
+    const lname    = document.getElementById('s-lname').value.trim();
+    const email    = document.getElementById('s-email').value.trim();
+    const username = document.getElementById('s-username').value.trim().toLowerCase();
+    const phone    = document.getElementById('s-phone').value.trim();
+    const password = document.getElementById('s-password').value;
+    const confirm  = document.getElementById('s-confirm').value;
+    const terms    = document.getElementById('s-terms').checked;
+    const errEl    = document.getElementById('signup-error');
+    const sucEl    = document.getElementById('signup-success');
+    errEl.classList.remove('show'); sucEl.classList.remove('show');
+
+    // Validations
+    if (!fname || !lname)             { showSignupError('Please enter your full name.'); return; }
+    if (!email || !email.includes('@')){ showSignupError('Please enter a valid email address.'); return; }
+    if (!username || username.length < 3){ showSignupError('Username must be at least 3 characters.'); return; }
+    if (!/^[a-z0-9_]+$/.test(username)){ showSignupError('Username can only contain letters, numbers, and underscores.'); return; }
+    if (username === 'admin')          { showSignupError('That username is not allowed.'); return; }
+    if (!password || password.length < 6){ showSignupError('Password must be at least 6 characters.'); return; }
+    if (password !== confirm)          { showSignupError('Passwords do not match.'); return; }
+    if (!terms)                        { showSignupError('Please agree to the Terms & Conditions.'); return; }
+
+    // Check duplicate username
+    const users = getUsers();
+    if (users.find(x => x.username === username)) { showSignupError('That username is already taken. Please choose another.'); return; }
+    if (users.find(x => x.email === email))       { showSignupError('An account with that email already exists.'); return; }
+
+    // Save new user
+    users.push({ firstName: fname, lastName: lname, email, username, phone, password, role: 'user', joinedAt: new Date().toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) });
+    saveUsers(users);
+
+    // Show success and switch to login
+    sucEl.textContent = '✅ Account created successfully! You can now sign in.';
+    sucEl.classList.add('show');
+    showToast('Account created! Please sign in.');
+
+    // Clear form and switch to login after 1.5s
+    setTimeout(() => {
+      ['s-fname','s-lname','s-email','s-username','s-phone','s-password','s-confirm'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('s-terms').checked = false;
+      document.getElementById('strength-fill').style.width = '0%';
+      document.getElementById('strength-text').textContent = '';
+      switchMain('login');
+      switchRole('user');
+    }, 1500);
+  }
+
+  function showSignupError(msg) {
+    const el = document.getElementById('signup-error');
+    el.textContent = msg; el.classList.add('show');
+  }
+
+  // ── USERNAME CHECK ───────────────────────────
+  function checkUsername() {
+    const val = document.getElementById('s-username').value.trim().toLowerCase();
+    const el  = document.getElementById('username-check');
+    if (!val) { el.textContent = ''; return; }
+    if (val.length < 3) { el.style.color = 'var(--yellow)'; el.textContent = 'Too short'; return; }
+    if (!/^[a-z0-9_]+$/.test(val)) { el.style.color = '#ff8066'; el.textContent = 'Only letters, numbers, underscores'; return; }
+    if (val === 'admin') { el.style.color = '#ff8066'; el.textContent = 'Not allowed'; return; }
+    const taken = getUsers().find(x => x.username === val);
+    if (taken) { el.style.color = '#ff8066'; el.textContent = '✗ Username already taken'; }
+    else { el.style.color = 'var(--green)'; el.textContent = '✓ Username available'; }
+  }
+
+  // ── PASSWORD STRENGTH ────────────────────────
+  function checkStrength() {
+    const pw  = document.getElementById('s-password').value;
+    const bar = document.getElementById('strength-fill');
+    const txt = document.getElementById('strength-text');
+    if (!pw) { bar.style.width='0%'; txt.textContent=''; return; }
+    let score = 0;
+    if (pw.length >= 6)  score++;
+    if (pw.length >= 10) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const levels = [
+      { w:'20%', c:'#e8341c', t:'Very Weak' },
+      { w:'40%', c:'#ff8066', t:'Weak' },
+      { w:'60%', c:'var(--yellow)', t:'Fair' },
+      { w:'80%', c:'#8bc34a', t:'Strong' },
+      { w:'100%', c:'var(--green)', t:'Very Strong' },
+    ];
+    const lvl = levels[Math.min(score-1, 4)] || levels[0];
+    bar.style.width = lvl.w; bar.style.background = lvl.c;
+    txt.style.color = lvl.c; txt.textContent = lvl.t;
+  }
+
+  // ── PASSWORD TOGGLE ──────────────────────────
+  function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  // ── TOAST ────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── SESSION ──────────────────────────────────
+  function saveSession(data) { sessionStorage.setItem('apex_user', JSON.stringify(data)); }
+
+  // ── ENTER KEY ────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (document.getElementById('panel-login').classList.contains('active')) doLogin();
+      else doSignup();
+    }
+  });
+
+  // ── INIT — pre-fill role hint ────────────────
+  switchRole('user');
+</script>
+</body>
+</html>

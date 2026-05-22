@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>APEX MOTORS — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0a0a0a;--surface:#111;--card:#161616;--border:#222;--accent:#e8341c;--accent2:#ff6b4a;--text:#f0ece4;--muted:#888;--green:#2ecc71;--yellow:#f0c040;--blue:#4a9eff;--font-head:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+    nav{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 36px;height:62px;}
+    .nav-logo{font-family:var(--font-head);font-size:1.7rem;letter-spacing:3px;}
+    .nav-logo span{color:var(--accent);}
+    .admin-badge{background:rgba(232,52,28,0.15);border:1px solid rgba(232,52,28,0.3);color:var(--accent);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:700;}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    .nav-user{font-size:0.78rem;color:var(--muted);}
+    .nav-user strong{color:var(--text);}
+    .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:3px;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent);}
+    .container{max-width:1200px;margin:0 auto;padding:40px 28px;}
+    .page-title{font-family:var(--font-head);font-size:2.8rem;letter-spacing:2px;margin-bottom:4px;}
+    .page-sub{color:var(--muted);font-size:0.83rem;margin-bottom:28px;}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin-bottom:28px;}
+    .stat-box{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:18px 20px;}
+    .snum{font-family:var(--font-head);font-size:2.2rem;color:var(--accent);line-height:1;}
+    .snum.g{color:var(--green);}.snum.y{color:var(--yellow);}.snum.b{color:var(--blue);}
+    .slbl{font-size:0.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;}
+    .tab{padding:10px 24px;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+    /* PANEL */
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:26px;}
+    .panel-head{font-family:var(--font-head);font-size:1.35rem;letter-spacing:1px;margin-bottom:3px;}
+    .panel-sub{color:var(--muted);font-size:0.75rem;margin-bottom:20px;}
+    /* INQUIRY CARDS */
+    .inq-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;margin-bottom:12px;overflow:hidden;transition:border-color 0.2s;}
+    .inq-card:hover{border-color:rgba(255,255,255,0.1);}
+    .inq-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:10px;flex-wrap:wrap;cursor:pointer;}
+    .inq-left{display:flex;align-items:center;gap:12px;}
+    .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.1rem;color:#fff;flex-shrink:0;}
+    .inq-name{font-weight:600;font-size:0.85rem;}
+    .inq-meta{font-size:0.7rem;color:var(--muted);}
+    .inq-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .badge{display:inline-block;padding:3px 9px;border-radius:2px;font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+    .b-pending{background:rgba(240,192,64,0.15);color:var(--yellow);}
+    .b-replied{background:rgba(46,204,113,0.15);color:var(--green);}
+    .abtn{padding:5px 12px;border-radius:2px;font-size:0.64rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;}
+    .abtn-reply{background:rgba(74,158,255,0.12);color:var(--blue);border:1px solid rgba(74,158,255,0.25);}
+    .abtn-reply:hover{background:rgba(74,158,255,0.22);}
+    .abtn-mark{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+    .abtn-mark:hover{background:rgba(46,204,113,0.22);}
+    .abtn-del{background:rgba(232,52,28,0.1);color:var(--accent);border:1px solid rgba(232,52,28,0.2);}
+    .abtn-del:hover{background:rgba(232,52,28,0.2);}
+    .inq-detail{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
+    .inq-detail.open{display:block;}
+    .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:14px 0;}
+    .detail-box{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:10px 12px;}
+    .detail-key{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+    .detail-val{font-size:0.84rem;font-weight:500;}
+    .msg-box{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:12px 14px;font-size:0.84rem;color:var(--muted);line-height:1.7;}
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.86);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:520px;width:100%;transform:translateY(20px);transition:transform 0.3s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+    .modal-title{font-family:var(--font-head);font-size:1.5rem;letter-spacing:1px;}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;transition:color 0.2s;}
+    .modal-close:hover{color:var(--accent);}
+    .modal-body{padding:22px;}
+    .modal-detail-box{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:12px 14px;margin-bottom:14px;font-size:0.82rem;color:var(--muted);line-height:1.7;}
+    .modal-detail-box strong{color:var(--text);}
+    .fg{display:flex;flex-direction:column;gap:5px;}
+    .fg label{font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+    .fg textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 13px;border-radius:3px;font-family:var(--font-body);font-size:0.84rem;outline:none;transition:border-color 0.2s;resize:vertical;}
+    .fg textarea:focus{border-color:var(--accent);}
+    .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);}
+    .btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 18px;border-radius:3px;font-size:0.73rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .btn-cancel:hover{border-color:var(--text);color:var(--text);}
+    .btn-send{background:var(--accent);color:#fff;border:none;padding:8px 22px;border-radius:3px;font-size:0.73rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background 0.2s;}
+    .btn-send:hover{background:var(--accent2);}
+    /* USERS GRID */
+    .users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
+    .user-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:20px;}
+    .user-avatar{width:46px;height:46px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.3rem;color:#fff;margin-bottom:12px;}
+    .user-name{font-weight:600;font-size:0.92rem;margin-bottom:2px;}
+    .user-uname{font-size:0.7rem;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+    .user-info{font-size:0.74rem;color:var(--muted);margin-bottom:3px;}
+    .user-info span{color:var(--text);}
+    /* FILTER */
+    .filter-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+    .fsel{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 13px;border-radius:3px;font-family:var(--font-body);font-size:0.8rem;outline:none;cursor:pointer;}
+    .fsel option{background:var(--card);}
+    .empty-msg{text-align:center;padding:40px;color:var(--muted);font-size:0.82rem;}
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;right:28px;z-index:500;background:var(--accent);color:#fff;padding:12px 22px;border-radius:3px;font-size:0.8rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all 0.35s;pointer-events:none;}
+    .toast.show{transform:translateY(0);opacity:1;}
+  </style>
+</head>
+<body>
+<nav>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="nav-logo">APEX<span>.</span>MOTORS</div>
+    <div class="admin-badge">Admin Panel</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">Signed in as <strong id="navName">Admin</strong></div>
+    <button class="btn-logout" onclick="logout()">Log Out</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-title">ADMIN DASHBOARD</div>
+  <div class="page-sub">Manage all customer inquiries and registered users.</div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="snum" id="sTotal">0</div><div class="slbl">Total Inquiries</div></div>
+    <div class="stat-box"><div class="snum y" id="sPending">0</div><div class="slbl">Pending</div></div>
+    <div class="stat-box"><div class="snum g" id="sReplied">0</div><div class="slbl">Replied</div></div>
+    <div class="stat-box"><div class="snum b" id="sUsers">0</div><div class="slbl">Registered Users</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('inquiries',this)">📋 All Inquiries</button>
+    <button class="tab" onclick="switchTab('users',this)">👥 Users</button>
+    <button class="tab" onclick="switchTab('replies',this)">💬 Sent Replies</button>
+  </div>
+
+  <!-- INQUIRIES -->
+  <div class="tab-content active" id="tab-inquiries">
+    <div class="panel">
+      <div class="panel-head">ALL INQUIRIES</div>
+      <div class="panel-sub">Click on a row to see full details. Use Reply to respond to the customer.</div>
+      <div class="filter-bar">
+        <select class="fsel" id="fStatus" onchange="renderInquiries()">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Replied">Replied</option>
+        </select>
+        <select class="fsel" id="fUser" onchange="renderInquiries()">
+          <option value="">All Users</option>
+        </select>
+      </div>
+      <div id="inquiriesList"></div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="tab-content" id="tab-users">
+    <div class="panel">
+      <div class="panel-head">REGISTERED USERS</div>
+      <div class="panel-sub">All customer accounts created via Sign Up.</div>
+      <div class="users-grid" id="usersGrid"></div>
+    </div>
+  </div>
+
+  <!-- REPLIES -->
+  <div class="tab-content" id="tab-replies">
+    <div class="panel">
+      <div class="panel-head">SENT REPLIES</div>
+      <div class="panel-sub">All replies you have sent to customers.</div>
+      <div id="repliesList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- REPLY MODAL -->
+<div class="modal-overlay" id="replyModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">REPLY TO CUSTOMER</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-detail-box" id="modalDetail"></div>
+      <div class="fg">
+        <label>Your Reply Message</label>
+        <textarea id="replyMsg" rows="5" placeholder="Type your response to the customer..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-send" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Auth
+  const session = JSON.parse(sessionStorage.getItem('apex_user') || 'null');
+  if (!session || session.role !== 'admin') window.location.href = 'login.html';
+  document.getElementById('navName').textContent = session ? session.name : 'Admin';
+
+  function logout() { sessionStorage.removeItem('apex_user'); window.location.href = 'login.html'; }
+
+  // Get all registered users from localStorage
+  function getUsers() { try { return JSON.parse(localStorage.getItem('apex_users') || '[]'); } catch(e){ return []; } }
+
+  function getInitials(u) {
+    const name = (u.firstName || '') + ' ' + (u.lastName || '');
+    return name.trim().split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || u.username[0].toUpperCase();
+  }
+
+  function getAllInquiries() {
+    const users = getUsers();
+    let all = [];
+    users.forEach(u => {
+      const key = 'apex_inquiries_' + u.username;
+      try {
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.forEach(i => all.push({ ...i, _user: u.username, _name: u.firstName + ' ' + u.lastName, _email: u.email, _phone: u.phone }));
+      } catch(e){}
+    });
+    return all.sort((a,b) => b.id - a.id);
+  }
+
+  function getAllReplies() {
+    const users = getUsers();
+    let all = [];
+    users.forEach(u => {
+      const key = 'apex_replies_' + u.username;
+      try {
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.forEach(r => all.push({ ...r, _user: u.username, _name: u.firstName + ' ' + u.lastName }));
+      } catch(e){}
+    });
+    return all.sort((a,b) => (b.sentAt||0) - (a.sentAt||0));
+  }
+
+  function updateStats() {
+    const all   = getAllInquiries();
+    const users = getUsers();
+    document.getElementById('sTotal').textContent   = all.length;
+    document.getElementById('sPending').textContent = all.filter(i=>i.status==='Pending').length;
+    document.getElementById('sReplied').textContent = all.filter(i=>i.status==='Replied').length;
+    document.getElementById('sUsers').textContent   = users.length;
+  }
+
+  function populateUserFilter() {
+    const users = getUsers();
+    const sel = document.getElementById('fUser');
+    sel.innerHTML = '<option value="">All Users</option>';
+    users.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.username;
+      opt.textContent = u.firstName + ' ' + u.lastName + ' (@' + u.username + ')';
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderInquiries() {
+    const statusF = document.getElementById('fStatus').value;
+    const userF   = document.getElementById('fUser').value;
+    let all = getAllInquiries();
+    if (statusF) all = all.filter(i => i.status === statusF);
+    if (userF)   all = all.filter(i => i._user === userF);
+
+    const container = document.getElementById('inquiriesList');
+    if (!all.length) { container.innerHTML = '<div class="empty-msg">No inquiries found.</div>'; updateStats(); return; }
+
+    const users = getUsers();
+    container.innerHTML = all.map(i => {
+      const u = users.find(x => x.username === i._user) || {};
+      const initials = getInitials(u);
+      return `
+        <div class="inq-card" id="card-${i.id}">
+          <div class="inq-head" onclick="toggleDetail(${i.id})">
+            <div class="inq-left">
+              <div class="avatar">${initials}</div>
+              <div>
+                <div class="inq-name">${i._name}</div>
+                <div class="inq-meta">@${i._user} · ${i.submittedAt} · ${i.type}</div>
+              </div>
+            </div>
+            <div class="inq-right">
+              <span style="font-size:0.78rem;color:var(--muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.car}</span>
+              <span class="badge ${i.status==='Replied'?'b-replied':'b-pending'}">${i.status}</span>
+              <button class="abtn abtn-reply" onclick="event.stopPropagation();openReply('${i._user}',${i.id})">Reply</button>
+              ${i.status==='Pending'?`<button class="abtn abtn-mark" onclick="event.stopPropagation();markReplied('${i._user}',${i.id})">Mark Replied</button>`:''}
+              <button class="abtn abtn-del" onclick="event.stopPropagation();deleteInquiry('${i._user}',${i.id})">Delete</button>
+            </div>
+          </div>
+          <div class="inq-detail" id="detail-${i.id}">
+            <div class="detail-grid">
+              <div class="detail-box"><div class="detail-key">Customer</div><div class="detail-val">${i._name}</div></div>
+              <div class="detail-box"><div class="detail-key">Email</div><div class="detail-val">${u.email||'—'}</div></div>
+              <div class="detail-box"><div class="detail-key">Phone</div><div class="detail-val">${i.phone||u.phone||'—'}</div></div>
+              <div class="detail-box"><div class="detail-key">Preferred Date</div><div class="detail-val">${i.date||'—'}</div></div>
+              <div class="detail-box"><div class="detail-key">Inquiry Type</div><div class="detail-val">${i.type}</div></div>
+              <div class="detail-box"><div class="detail-key">Status</div><div class="detail-val">${i.status}</div></div>
+            </div>
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Car Inquired</div>
+            <div style="font-size:0.85rem;font-weight:600;margin-bottom:12px;">${i.car}</div>
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Message</div>
+            <div class="msg-box">${i.msg}</div>
+          </div>
+        </div>`;
+    }).join('');
+    updateStats();
+  }
+
+  function toggleDetail(id) {
+    const el = document.getElementById('detail-' + id);
+    if (el) el.classList.toggle('open');
+  }
+
+  function renderUsers() {
+    const users = getUsers();
+    const grid  = document.getElementById('usersGrid');
+    if (!users.length) { grid.innerHTML = '<div class="empty-msg">No registered users yet.</div>'; return; }
+    grid.innerHTML = users.map(u => {
+      const key = 'apex_inquiries_' + u.username;
+      let count = 0;
+      try { count = JSON.parse(localStorage.getItem(key)||'[]').length; } catch(e){}
+      return `
+        <div class="user-card">
+          <div class="user-avatar">${getInitials(u)}</div>
+          <div class="user-name">${u.firstName} ${u.lastName}</div>
+          <div class="user-uname">@${u.username}</div>
+          <div class="user-info">📧 <span>${u.email||'—'}</span></div>
+          <div class="user-info">📞 <span>${u.phone||'—'}</span></div>
+          <div class="user-info">📅 Joined: <span>${u.joinedAt||'—'}</span></div>
+          <div class="user-info">📋 Inquiries: <span>${count}</span></div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderReplies() {
+    const all = getAllReplies();
+    const container = document.getElementById('repliesList');
+    if (!all.length) { container.innerHTML = '<div class="empty-msg">No replies sent yet.</div>'; return; }
+    container.innerHTML = all.map(r => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+          <div style="font-size:0.8rem;font-weight:600;">To: ${r._name} (@${r._user}) — Re: ${r.car}</div>
+          <div style="font-size:0.68rem;color:var(--muted);">${r.repliedAt}</div>
+        </div>
+        <div style="color:var(--muted);font-size:0.82rem;line-height:1.6;">${r.message}</div>
+      </div>`).join('');
+  }
+
+  // REPLY MODAL
+  let currentReply = null;
+  function openReply(username, inquiryId) {
+    const key  = 'apex_inquiries_' + username;
+    const list = JSON.parse(localStorage.getItem(key)||'[]');
+    const inq  = list.find(i => i.id === inquiryId);
+    if (!inq) return;
+    const users = getUsers();
+    const u = users.find(x => x.username === username) || {};
+    currentReply = { username, inquiryId, car: inq.car, type: inq.type, msg: inq.msg };
+    document.getElementById('modalDetail').innerHTML =
+      `<strong>Customer:</strong> ${u.firstName||''} ${u.lastName||''} (@${username})<br>
+       <strong>Car:</strong> ${inq.car}<br>
+       <strong>Type:</strong> ${inq.type}<br>
+       <strong>Message:</strong> ${inq.msg}`;
+    document.getElementById('replyMsg').value = '';
+    document.getElementById('replyModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('replyModal').classList.remove('open'); currentReply=null; }
+  document.getElementById('replyModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+  function sendReply() {
+    if (!currentReply) return;
+    const msg = document.getElementById('replyMsg').value.trim();
+    if (!msg) { showToast('Please type a reply message.'); return; }
+
+    const rKey = 'apex_replies_' + currentReply.username;
+    let replies = [];
+    try { replies = JSON.parse(localStorage.getItem(rKey)||'[]'); } catch(e){}
+    replies.unshift({
+      id: Date.now(), car: currentReply.car, message: msg,
+      adminName: session.name,
+      repliedAt: new Date().toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      sentAt: Date.now()
+    });
+    localStorage.setItem(rKey, JSON.stringify(replies));
+    markReplied(currentReply.username, currentReply.inquiryId, true);
+    closeModal();
+    showToast('✅ Reply sent to ' + currentReply.username);
+    renderReplies();
+  }
+
+  function markReplied(username, inquiryId, silent) {
+    const key  = 'apex_inquiries_' + username;
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){}
+    const idx = list.findIndex(i => i.id === inquiryId);
+    if (idx > -1) { list[idx].status = 'Replied'; localStorage.setItem(key, JSON.stringify(list)); }
+    renderInquiries();
+    if (!silent) showToast('Marked as Replied.');
+  }
+
+  function deleteInquiry(username, inquiryId) {
+    if (!confirm('Delete this inquiry? This cannot be undone.')) return;
+    const key  = 'apex_inquiries_' + username;
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){}
+    localStorage.setItem(key, JSON.stringify(list.filter(i => i.id !== inquiryId)));
+    renderInquiries();
+    showToast('Inquiry deleted.');
+  }
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name==='users')   renderUsers();
+    if (name==='replies') renderReplies();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  // Init
+  populateUserFilter();
+  renderInquiries();
+  updateStats();
+  // Auto refresh every 5 seconds
+  setInterval(() => { renderInquiries(); updateStats(); populateUserFilter(); }, 5000);
+</script>
+</body>
+</html>
