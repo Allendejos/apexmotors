@@ -59,6 +59,33 @@
     .profile-detail{font-size:0.75rem;color:var(--muted);}
     .toast{position:fixed;bottom:28px;right:28px;z-index:500;background:var(--accent);color:#fff;padding:12px 22px;border-radius:3px;font-size:0.8rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all 0.35s;pointer-events:none;}
     .toast.show{transform:translateY(0);opacity:1;}
+
+    /* CAR CATALOG */
+    .catalog-section{margin-bottom:28px;}
+    .catalog-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+    .filter-btn{padding:7px 18px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;}
+    .filter-btn.active,.filter-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;}
+    .cat-card{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;cursor:pointer;transition:transform 0.3s,border-color 0.3s,box-shadow 0.3s;}
+    .cat-card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 16px 40px rgba(232,52,28,0.12);}
+    .cat-img{width:100%;height:170px;object-fit:cover;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .cat-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s;}
+    .cat-card:hover .cat-img img{transform:scale(1.05);}
+    .cat-tag{position:absolute;top:10px;left:10px;background:var(--accent);color:#fff;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:1px;font-weight:700;}
+    .cat-tag.new{background:var(--green);color:#111;}
+    .cat-tag.hot{background:var(--gold);color:#111;}
+    .cat-body{padding:16px 18px 18px;}
+    .cat-brand{font-size:0.64rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+    .brand-logo{width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid var(--border);}
+    .cat-name{font-family:var(--font-head);font-size:1.4rem;letter-spacing:1px;line-height:1;margin-bottom:10px;}
+    .cat-specs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .cat-spec{font-size:0.68rem;color:var(--muted);}
+    .cat-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);}
+    .cat-price{font-family:var(--font-head);font-size:1.5rem;color:var(--accent);}
+    .cat-price small{font-family:var(--font-body);font-size:0.64rem;color:var(--muted);display:block;line-height:1;}
+    .btn-inquire{background:var(--accent);color:#fff;border:none;padding:7px 16px;border-radius:2px;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .btn-inquire:hover{background:var(--accent2);}
+    .no-results{text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;grid-column:1/-1;}
   </style>
 </head>
 <body>
@@ -88,6 +115,28 @@
     <div class="stat-box"><div class="snum" id="sTotal">0</div><div class="slbl">Total Inquiries</div></div>
     <div class="stat-box"><div class="snum y" id="sPending">0</div><div class="slbl">Pending</div></div>
     <div class="stat-box"><div class="snum g" id="sReplied">0</div><div class="slbl">Replied</div></div>
+  </div>
+
+
+  <!-- CAR CATALOG -->
+  <div class="catalog-section">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:0.66rem;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Browse Collection</div>
+        <div style="font-family:var(--font-head);font-size:2rem;letter-spacing:2px;line-height:1;">AVAILABLE CARS</div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);">Click any car to inquire instantly</div>
+    </div>
+    <!-- FILTER BUTTONS -->
+    <div class="catalog-filter">
+      <button class="filter-btn active" onclick="filterCatalog('all',this)">All</button>
+      <button class="filter-btn" onclick="filterCatalog('suv',this)">SUV</button>
+      <button class="filter-btn" onclick="filterCatalog('sedan',this)">Sedan</button>
+      <button class="filter-btn" onclick="filterCatalog('pickup',this)">Pickup</button>
+      <button class="filter-btn" onclick="filterCatalog('hatchback',this)">Hatchback</button>
+    </div>
+    <!-- CATALOG GRID -->
+    <div class="catalog-grid" id="catalogGrid"></div>
   </div>
 
   <div class="two-col">
@@ -231,6 +280,138 @@
     t.textContent=msg; t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'),3000);
   }
+
+
+  // ── CAR CATALOG DATA ─────────────────────────
+  const CARS = [
+    {
+      id:1, brand:'Toyota', name:'Fortuner G 4x2 AT', year:2024,
+      type:'suv', tag:'Brand New', tagClass:'new',
+      price:'₱2,285,000', fuel:'Diesel', trans:'Automatic', km:'0 km', seats:'7',
+      img:'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Toyota_carlogo.svg/120px-Toyota_carlogo.svg.png'
+    },
+    {
+      id:2, brand:'Honda', name:'Civic RS Turbo', year:2023,
+      type:'sedan', tag:'Pre-Owned', tagClass:'',
+      price:'₱1,528,000', fuel:'Gasoline', trans:'Automatic', km:'8,500 km', seats:'5',
+      img:'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Honda_Logo.svg/120px-Honda_Logo.svg.png'
+    },
+    {
+      id:3, brand:'Ford', name:'Ranger Wildtrak 4x4', year:2023,
+      type:'pickup', tag:'Low Mileage', tagClass:'hot',
+      price:'₱1,895,000', fuel:'Diesel', trans:'Automatic', km:'12,000 km', seats:'5',
+      img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ford_logo_flat.svg/120px-Ford_logo_flat.svg.png'
+    },
+    {
+      id:4, brand:'Hyundai', name:'Tucson GLS+ AWD', year:2022,
+      type:'suv', tag:'Best Value', tagClass:'hot',
+      price:'₱1,450,000', fuel:'Gasoline', trans:'Automatic', km:'22,000 km', seats:'5',
+      img:'https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Hyundai_Motor_Company_logo.svg/120px-Hyundai_Motor_Company_logo.svg.png'
+    },
+    {
+      id:5, brand:'Mitsubishi', name:'Montero Sport GLS', year:2024,
+      type:'suv', tag:'Brand New', tagClass:'new',
+      price:'₱2,048,000', fuel:'Diesel', trans:'Automatic', km:'0 km', seats:'7',
+      img:'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Mitsubishi_logo.svg/120px-Mitsubishi_logo.svg.png'
+    },
+    {
+      id:6, brand:'Nissan', name:'Terra VL 4x4 AT', year:2022,
+      type:'suv', tag:'Pre-Owned', tagClass:'',
+      price:'₱1,698,000', fuel:'Diesel', trans:'Automatic', km:'18,500 km', seats:'7',
+      img:'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Nissan_2020_logo.svg/120px-Nissan_2020_logo.svg.png'
+    },
+    {
+      id:7, brand:'Toyota', name:'Vios XLE CVT', year:2023,
+      type:'sedan', tag:'Pre-Owned', tagClass:'',
+      price:'₱878,000', fuel:'Gasoline', trans:'CVT', km:'15,000 km', seats:'5',
+      img:'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Toyota_carlogo.svg/120px-Toyota_carlogo.svg.png'
+    },
+    {
+      id:8, brand:'Kia', name:'Stonic EX 1.4 AT', year:2023,
+      type:'hatchback', tag:'Low Mileage', tagClass:'hot',
+      price:'₱1,055,000', fuel:'Gasoline', trans:'Automatic', km:'9,200 km', seats:'5',
+      img:'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Kia-logo.svg/120px-Kia-logo.svg.png'
+    },
+    {
+      id:9, brand:'Suzuki', name:'Jimny GLX 4x4 AT', year:2024,
+      type:'suv', tag:'Brand New', tagClass:'new',
+      price:'₱1,228,000', fuel:'Gasoline', trans:'Automatic', km:'0 km', seats:'4',
+      img:'https://images.unsplash.com/photo-1616788494707-ec28f08d05a1?w=600&q=80',
+      brandImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Suzuki_logo_2.svg/120px-Suzuki_logo_2.svg.png'
+    },
+  ];
+
+  let currentFilter = 'all';
+
+  function filterCatalog(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCatalog();
+  }
+
+  function renderCatalog() {
+    const grid = document.getElementById('catalogGrid');
+    const filtered = currentFilter === 'all' ? CARS : CARS.filter(c => c.type === currentFilter);
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="no-results">No cars found in this category.</div>';
+      return;
+    }
+    grid.innerHTML = filtered.map(c => `
+      <div class="cat-card" onclick="quickInquire('${c.brand} ${c.name} — ${c.price}')">
+        <div class="cat-img">
+          <img src="${c.img}" alt="${c.name}" onerror="this.parentElement.style.background='#1a1a1a';this.style.display='none'"/>
+          <div class="cat-tag ${c.tagClass}">${c.tag}</div>
+        </div>
+        <div class="cat-body">
+          <div class="cat-brand">
+            <img class="brand-logo" src="${c.brandImg}" alt="${c.brand}" onerror="this.style.display='none'"/>
+            ${c.brand} · ${c.year}
+          </div>
+          <div class="cat-name">${c.name}</div>
+          <div class="cat-specs">
+            <span class="cat-spec">⛽ ${c.fuel}</span>
+            <span class="cat-spec">⚙️ ${c.trans}</span>
+            <span class="cat-spec">🛣️ ${c.km}</span>
+            <span class="cat-spec">💺 ${c.seats} Seats</span>
+          </div>
+          <div class="cat-foot">
+            <div class="cat-price"><small>Starting at</small>${c.price}</div>
+            <button class="btn-inquire" onclick="event.stopPropagation();quickInquire('${c.brand} ${c.name} — ${c.price}')">Inquire</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function quickInquire(carName) {
+    // Pre-fill the inquiry form and scroll to it
+    const sel = document.getElementById('f-car');
+    // Try to match existing option or set a custom one
+    let matched = false;
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].text.toLowerCase().includes(carName.split('—')[0].trim().toLowerCase().substring(0,15))) {
+        sel.selectedIndex = i; matched = true; break;
+      }
+    }
+    if (!matched) {
+      // Add as a temporary option
+      const opt = document.createElement('option');
+      opt.value = carName; opt.text = carName; opt.selected = true;
+      sel.appendChild(opt);
+    }
+    document.querySelector('.two-col').scrollIntoView({ behavior: 'smooth' });
+    showToast('Car selected! Fill in the inquiry form below.');
+  }
+
+  renderCatalog();
 
   renderAll();
   // Auto-refresh replies every 5 seconds
